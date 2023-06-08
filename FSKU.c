@@ -4,12 +4,16 @@
 
 int main(int argc, char* argv){
 
-    unsigned int size = 32*1024; //32KB mem
-    char* buffer = (char*)malloc(size); //char=1byte
+    unsigned int SIZE_STORAGE = 32*1024; //32KB mem
+    unsigned int SUPER = 512;
+    char* buffer = (char*)malloc(SIZE_STORAGE); //char=1byte
 
-    memset(buffer,'1',size);
+    memset(buffer,'0',SIZE_STORAGE);
 
-    for(size_t i=0;i<size;i++){
+    //printf("size : %u\n",sizeof(SIZE_STORAGE));
+
+    //print memory
+    for(unsigned int i=0;i<SIZE_STORAGE;i++){
         printf("%c",buffer[i]);
     }
     printf("\n");
