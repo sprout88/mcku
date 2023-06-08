@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int main(int argc, char* argv){
+int main(int argc, char* argv[]){
 
     unsigned int SIZE_STORAGE = 32*1024; //32KB mem
     unsigned int SIZE_BLOCK = 512;
@@ -32,20 +32,20 @@ int main(int argc, char* argv){
     }
     /* init i-bmap*/
     for(unsigned int i=offset_IBMAP;i<offset_IBMAP+SIZE_BLOCK;i++){
-        *(storage+i)='b'; // fill super block with 0
+        *(storage+i)='0'; // fill super block with 0
     }
-    *(storage+offset_IBMAP)='R'; // 삭제 비트 나중에 0으로 수정
-    *(storage+offset_IBMAP+1)='B'; // 배드 비트 나중에 0으로 수정
+    *(storage+offset_IBMAP)='0'; // 삭제 비트 나중에 0으로 수정
+    *(storage+offset_IBMAP+1)='0'; // 배드 비트 나중에 0으로 수정
 
     /* init i-bmap*/
     for(unsigned int i=offset_DBMAP;i<offset_DBMAP+SIZE_BLOCK;i++){
-        *(storage+i)='r'; // fill super block with 0
+        *(storage+i)='0'; // fill super block with 0
     }
     *(storage+offset_DBMAP)='1'; // root dir bit
 
     /* init iblock0*/
     for(unsigned int i=offset_INODE0;i<offset_INODE0+SIZE_BLOCK;i++){
-        *(storage+i)='z'; // fill iblock0 z
+        *(storage+i)='0'; // fill iblock0 z
     }
     /* init root directory's inode */
     *(storage+offset_INODE0+2)='R';
@@ -54,22 +54,69 @@ int main(int argc, char* argv){
     inode_root->blocks = 1;
     inode_root->dptr = 0;
     inode_root->iptr = 0;
-    memcpy(inode_root,&storage,sizeof(inode));
+    memcpy(storage+offset_INODE0,inode_root,sizeof(inode_root));
+
+    /*memcpy test*/
+    // char* src = malloc(sizeof(char)*8);
+    // for(int i=0;i<sizeof(src);i++){
+    //     *(src+i)='c';
+    // }
+    // memcpy(storage+offset_INODE0,src,sizeof(src));
 
     /*set root directory's inode's dptr table*/
     
     /* init iblock1*/
     for(unsigned int i=offset_INODE1;i<offset_INODE1+SIZE_BLOCK;i++){
-        *(storage+i)='o'; // fill iblock1 o
+        *(storage+i)='0'; // fill iblock1 o
     }
+
+    /* file reader */
+    FILE* file;
+    file = fopen(argv[1],"r");
+
+    char line_buffer[100];
+
+    typedef struct _file_ent{
+        char filename[5];
+        char iocommand[5];
+        int filelen;
+    }file_ent;
+
+    file_ent line_data;
+    while(fscanf(file,"%s %s %d\n",line_data.filename,line_data.iocommand,&line_data.filelen)==3){
+        printf("%s %s %d\n",line_data.filename,line_data.iocommand,line_data.filelen);\
+        /*write op*/
+        if(line_data.iocommand[0]=='w'){
+            //printf("write!\n");
+            /* init i-bmap*/
+            for(unsigned int i=offset_IBMAP;i<offset_DBMAP+SIZE_BLOCK;i++){
+                // if(*(storage+offset_DBMAP+i)!='0'){
+                if(*(storage+offset_DBMAP+i)=='0'){    
+                    //printf("%d\n",i);
+                   *(storage+offset_INODE1+i)=line_data.filename[0];
+                   break;
+                }else{
+                    printf("fail\n");
+                }
+            }
+        }
+        if(line_data.iocommand[0]=='r'){
+            printf("Success\n");
+        }
+        if(line_data.iocommand[0]=='d'){
+            printf("Success\n");
+        }
+    }
+    
 
     /*print whole memory*/
     for(unsigned int i=0;i<SIZE_STORAGE;i++){
-        printf("%d",storage[i]);
+        printf("%x ",storage[i]);
     }
     printf("\n");
     
     free(storage);
+    fclose(file);
 
 
     return 0;
