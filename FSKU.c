@@ -42,11 +42,30 @@ int main(int argc, char* argv){
         *(storage+i)='r'; // fill super block with 0
     }
     *(storage+offset_DBMAP)='1'; // root dir bit
+
+    /* init iblock0*/
+    for(unsigned int i=offset_INODE0;i<offset_INODE0+SIZE_BLOCK;i++){
+        *(storage+i)='z'; // fill iblock0 z
+    }
+    /* init root directory's inode */
+    *(storage+offset_INODE0+2)='R';
+    inode* inode_root = malloc(sizeof(inode));
+    inode_root->fsize = 4*61;
+    inode_root->blocks = 1;
+    inode_root->dptr = 0;
+    inode_root->iptr = 0;
+    memcpy(inode_root,&storage,sizeof(inode));
+
+    /*set root directory's inode's dptr table*/
     
+    /* init iblock1*/
+    for(unsigned int i=offset_INODE1;i<offset_INODE1+SIZE_BLOCK;i++){
+        *(storage+i)='o'; // fill iblock1 o
+    }
 
     /*print whole memory*/
     for(unsigned int i=0;i<SIZE_STORAGE;i++){
-        printf("%c",storage[i]);
+        printf("%d",storage[i]);
     }
     printf("\n");
     
