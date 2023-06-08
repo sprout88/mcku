@@ -14,9 +14,10 @@ int main(int argc,char* argv[]){
     }file_ent;
 
     file_ent line_data;
-    fscanf(file,"%s %s %d\n",line_data.filename,line_data.iocommand,&line_data.filelen);
-    printf("%s %s %d\n",line_data.filename,line_data.iocommand,line_data.filelen);
-
+    while(fscanf(file,"%s %s %d\n",line_data.filename,line_data.iocommand,&line_data.filelen)==3){
+        printf("%s %s %d\n",line_data.filename,line_data.iocommand,line_data.filelen);
+    }
+    
 
     fclose(file);
 
